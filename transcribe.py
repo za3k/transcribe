@@ -49,21 +49,24 @@ class TranscriptionWindow(tk.Tk):
         self.frame = frame = tk.Frame(self)
         frame.grid(row=0, column=0, sticky=tk.W+tk.N+tk.E+tk.S)
         # "Flex" rows that take up extra space
-        frame.grid_rowconfigure(2, weight=1)
+        frame.grid_rowconfigure(3, weight=1)
         frame.grid_columnconfigure(1, weight=1)
         frame.grid_columnconfigure(2, minsize=100)
 
         self.sv_current_image = tk.StringVar(frame, "Loading...")
-        self.lbl_image = tk.Label(frame, textvariable=self.sv_current_image, padx=20, pady=20)
+        self.lbl_image = tk.Label(frame, textvariable=self.sv_current_image, padx=20, pady=0)
         self.lbl_image.grid(column=1, row=1)
+        self.sv_progress = tk.StringVar(frame, "Loading...")
+        self.lbl_progress = tk.Label(frame, textvariable=self.sv_progress, padx=20, pady=0)
+        self.lbl_progress.grid(column=1, row=2)
         self.image_canvas = Image(frame)
-        self.image_canvas.grid(column=1, row=2, rowspan=2, sticky=tk.W+tk.N+tk.E+tk.S) # row 2+3
+        self.image_canvas.grid(column=1, row=3, rowspan=2, sticky=tk.W+tk.N+tk.E+tk.S) # row 2+3
 
         self.txt_entry = tk.Text(frame)
-        self.txt_entry.grid(column=2, row=1, rowspan=2, sticky=tk.W+tk.N+tk.E+tk.S)
+        self.txt_entry.grid(column=2, row=1, rowspan=3, sticky=tk.W+tk.N+tk.E+tk.S)
 
         self.frm_button = tk.Frame(frame)
-        self.frm_button.grid(column=2, row=3)
+        self.frm_button.grid(column=2, row=4)
         self.btn_save = tk.Button(self.frm_button, text="Save transcript")
         self.btn_save.grid(column=1, row=1)
         #self.btn_blacklist = tk.Button(self.frm_button, text="Blacklist (permanent skip)")
@@ -80,6 +83,7 @@ class TranscriptionWindow(tk.Tk):
         self.txt_entry.bind("<Key>", self.handle_keypress)
 
         self.update_buttons()
+        self.update_progress()
 
     def transcription_content(self):
         return self.txt_entry.get("1.0", tk.END).strip()
@@ -89,6 +93,7 @@ class TranscriptionWindow(tk.Tk):
         self.check_transcribed()
         if self.current_image is None:
             self.switch_image()
+        self.update_progress()
 
     def _transcription_path(self, image_path):
         return "{}.txt".format(image_path)
@@ -115,6 +120,7 @@ class TranscriptionWindow(tk.Tk):
         else:
             self.image_canvas.set(self.current_image)
             self.sv_current_image.set(self.current_image)
+        self.txt_entry.delete("1.0", tk.END)
 
     def submit_transcription(self):
         assert self.current_image is not None
@@ -142,14 +148,20 @@ class TranscriptionWindow(tk.Tk):
             self.btn_skip_prev.config(state=tk.DISABLED)
             #self.btn_blacklist.config(state=tk.DISABLED)
             self.btn_save.config(state=tk.NORMAL)
+    
+    def update_progress(self):
+        transcribed_count = len(self.transcribed)
+        nontranscribed_count = len(self.images) - transcribed_count
+        self.sv_progress.set("{} complete | {} incomplete".format(transcribed_count, nontranscribed_count))
 
     def handle_keypress(self, event):
-        self.update_buttons()
+        self.update_buttons() # slightly wrong because the keypress hasn't been handled yet, so empty/not-empty is off by one keypress
 
     def handle_save(self, event):
         if self.transcription_content() != "":
             self.submit_transcription()
             self.update_buttons()
+            self.update_progress()
         else:
             # Instead grey out submit until you type stuff
             tk.messagebox.showerror("Cannot submit empty transcription")
