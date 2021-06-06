@@ -7,6 +7,6 @@ Usage: transcribe.py FILE [FILE...]
 
 ![Screenshot of transcribe.py](screenshot.jpg)
 
-On one side of the screen the image is displayed. On the other, you type what you see. When you're done, press "next". When all the images are transcribed, you can exit the program (progress is shown).
+On one side of the screen the image is displayed (my scanner sucks, as you can see). On the other, you type what you see. When you're done, press "next". When all the images are transcribed, you can exit the program (progress is shown).
 
 The transcriptions are just saved as (for the example file 001.jpg): 001.jpg.txt, 002.jpg.txt, etc.
