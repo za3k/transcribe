@@ -107,7 +107,6 @@ class TranscriptionWindow(tk.Tk):
     def switch_image(self, offset=1):
         available = natsort.natsorted(set(self.images)-set(self.transcribed))
         if len(available) == 0:
-            self.set_done()
             self.current_image = None
         elif self.current_image is None:
             self.current_image = available[0]
